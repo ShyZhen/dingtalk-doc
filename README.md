@@ -54,13 +54,13 @@ node scripts/index.js list-workspaces
 Linux / macOS：
 
 ```bash
-node ~/.openclaw/skills/dingtalk-knowledge/scripts/index.js list-workspaces
+node ~/.openclaw/skills/dingtalk-doc/scripts/index.js list-workspaces
 ```
 
 Windows PowerShell：
 
 ```powershell
-node $env:USERPROFILE\.openclaw\skills\dingtalk-knowledge\scripts\index.js list-workspaces
+node $env:USERPROFILE\.openclaw\skills\dingtalk-doc\scripts\index.js list-workspaces
 ```
 
 注意：
@@ -161,7 +161,7 @@ node scripts/whitelist.js check "/三级文档.adoc"
 ## 目录结构
 
 ```text
-dingtalk-knowledge/
+dingtalk-doc/
 ├── SKILL.md
 ├── README.md
 ├── package.json
@@ -198,6 +198,7 @@ dingtalk-knowledge/
 - 即使文档在三级子目录中，节点详情也可能只返回 `"name": "三级文档.adoc"`，不会返回 `"/一级/二级/三级文档.adoc"`。
 - `get-content --nodeId=...` / `GET /v1.0/doc/suites/documents/{docKey}/blocks` 返回的是块结构，例如 paragraph 的 `id`、`index`、`text`，不返回文档路径或父目录信息。
 - `nodeId` 用于查询节点详情和校验真实 `workspaceId`；`docKey` 用于 suites/documents 内容读写接口。多数情况下可先用 `nodeId` 作为 `docKey` 尝试。
+- `insert-block`、`modify-block`、`delete-block` 已在真实文档上测试通过；`append-text` 对应的 `paragraphs/{blockId}/text` 当前返回 `InvalidAction.NotFound`，不要依赖它。
 
 ## 权限与接口
 
@@ -209,6 +210,9 @@ dingtalk-knowledge/
 - `DELETE /v1.0/doc/workspaces/{workspaceId}/docs/{nodeId}`
 - `GET /v1.0/doc/suites/documents/{docKey}/blocks`
 - `POST /v1.0/doc/suites/documents/{docKey}/overwriteContent`
+- `POST /v1.0/doc/suites/documents/{docKey}/blocks`
+- `PUT /v1.0/doc/suites/documents/{docKey}/blocks/{blockId}`
+- `DELETE /v1.0/doc/suites/documents/{docKey}/blocks/{blockId}`
 
 常见所需权限：
 
