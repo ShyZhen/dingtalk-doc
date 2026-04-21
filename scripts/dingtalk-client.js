@@ -478,16 +478,6 @@ async function deleteBlock(docKey, blockId, operatorId) {
 }
 
 /**
- * 追加文本到段落
- * API: POST /v1.0/doc/suites/documents/{docKey}/paragraphs/{blockId}/text
- */
-async function appendText(docKey, blockId, text, operatorId) {
-  const path = `/v1.0/doc/suites/documents/${docKey}/paragraphs/${blockId}/text?operatorId=${encodeURIComponent(operatorId)}`;
-  const body = { text };
-  return await request('POST', path, {}, body);
-}
-
-/**
  * 修改、更新块元素
  * API: PUT /v1.0/doc/suites/documents/{docKey}/blocks/{blockId}
  * 
@@ -653,8 +643,7 @@ module.exports = {
   overwriteContent,
   insertBlock,
   modifyBlock,
-  deleteBlock,
-  appendText
+  deleteBlock
 };
 
 // 命令行执行
