@@ -3,7 +3,7 @@
   "workspaces": [
     {
       "workspaceId": "eLvJDSRX3l4moO87",
-      "workspaceName": "AI可写知识库",
+      "workspaceName": "AI可写知识库一级目录",
       "allowRootWrite": true,
       "whitelist": ["/"]
     }
