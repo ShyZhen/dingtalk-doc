@@ -22,7 +22,6 @@ const {
   deleteDoc,
   queryBlocks,
   overwriteContent,
-  appendText,
   deleteBlock,
   modifyBlock,
   insertBlock,
@@ -510,36 +509,6 @@ async function updateDocContent(nodeId, markdown, config = null, senderId = null
 }
 
 /**
- * 追加文本到段落（写入操作，需要白名单）
- * API: POST /v1.0/doc/suites/documents/{docKey}/paragraphs/{blockId}/text
- * 
- * @param {string} nodeId - 节点 ID（用于白名单检查）
- * @param {string} blockId - 块 ID
- * @param {string} text - 要追加的文本
- * @param {Object|null} config - 白名单配置
- * @param {string|null} senderId - 发送者 ID
- * @param {string|null} workspaceId - 可选，知识库 ID
- * @param {string|null} docKey - 可选，真实的 docKey（如果不传则使用 nodeId 代替）
- */
-async function appendDocText(nodeId, blockId, text, config = null, senderId = null, workspaceId = null, docKey = null) {
-  if (!config) {
-    config = loadConfig();
-  }
-  
-  const token = await getAccessToken();
-  const operatorId = await getCurrentOperatorId(token, senderId);
-  
-  // ✅ 复用 helper：完整的权限检查流程
-  await checkFullWritePermission(nodeId, operatorId, config, workspaceId);
-  
-  // 使用真实的 docKey（如果传入），否则用 nodeId 代替
-  const actualDocKey = docKey || nodeId;
-  const result = await appendText(actualDocKey, blockId, text, operatorId);
-  
-  return { success: true, data: result };
-}
-
-/**
  * 删除块元素（写入操作，需要白名单）
  * API: DELETE /v1.0/doc/suites/documents/{docKey}/blocks/{blockId}
  * 
@@ -658,7 +627,6 @@ async function main() {
     update-content            更新文档内容（整篇覆写）
 
   块级操作:
-    append-text               追加文本到段落
     delete-block              删除块元素
     modify-block              修改块元素
     insert-block              插入块元素
@@ -673,7 +641,6 @@ async function main() {
   --docType     文档类型：DOC, WORKBOOK, MIND, FOLDER
   --parentNodeId 父节点 ID（默认 root）
   --blockId     块 ID（用于块级操作，通过 get-content 获取）
-  --text        文本内容（用于 append-text）
   --element     块元素 JSON（用于 modify-block, insert-block）
   --position    插入位置（用于 insert-block，可选，数字，支持 0）
 
@@ -829,20 +796,6 @@ async function main() {
         result = await updateDocContent(nodeId_uc, decodeCliValue(content), config, senderId, workspaceIdParam, docKey_uc);
         break;
         
-      case 'append-text':
-        const nodeId_at = getParam('nodeId');
-        const docKey_at = getParam('docKey'); // 可选
-        const blockId1 = getParam('blockId');
-        const text = getParam('text');
-        const workspaceId3 = getParam('workspaceId');
-        
-        if (!nodeId_at) throw new Error('缺少必填参数：--nodeId=');
-        if (!blockId1) throw new Error('缺少必填参数：--blockId=');
-        if (!text) throw new Error('缺少必填参数：--text=');
-        
-        result = await appendDocText(nodeId_at, blockId1, decodeCliValue(text), config, senderId, workspaceId3, docKey_at);
-        break;
-        
       case 'delete-block':
         const nodeId_db = getParam('nodeId');
         const docKey_db = getParam('docKey'); // 可选
@@ -911,7 +864,6 @@ module.exports = {
   listWorkspaces,
   getDocContent,
   updateDocContent,
-  appendDocText,
   deleteBlockWithPermission,
   modifyBlockWithPermission,
   insertBlockWithPermission
