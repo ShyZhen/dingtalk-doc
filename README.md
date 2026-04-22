@@ -1,5 +1,7 @@
 # 钉钉文档管理技能 (dingtalk-doc)
 
+> https://clawhub.ai/shyzhen/dingtalk-doc
+
 通过钉钉开放平台 API 读取和管理钉钉文档、钉钉知识库中的文档。本文件面向人类读者，重点说明配置、上手方式和排障思路；执行规则与触发策略见 `SKILL.md`。
 
 ## 能力概览
