@@ -48,6 +48,22 @@ function hasWorkspaceWideWhitelist(whitelist) {
   return Array.isArray(whitelist) && whitelist.some(rule => normalizePath(rule) === '/');
 }
 
+function getWhitelistSetupHint(config) {
+  const configPath = config && config._configPath ? config._configPath : 'config/whitelist.json';
+  return `📝 解决方法：在 ${configPath} 中为目标知识库配置 whitelist`;
+}
+
+function assertWhitelistFileExists(config) {
+  if (config && config._missingConfig) {
+    throw new Error(
+      `❌ 权限拒绝：未找到白名单配置文件，写入操作已被阻止\n` +
+      `📄 配置文件：${config._configPath}\n` +
+      `💡 安全策略：所有写入操作必须在白名单内\n` +
+      `📝 解决方法：请先手动创建该文件并配置 workspaces / whitelist`
+    );
+  }
+}
+
 /**
  * 获取节点路径（从根节点到当前节点）
  */
@@ -141,13 +157,15 @@ async function getDocWorkspaceId(identifier, operatorId, workspaceId = null) {
  * @returns {Promise<{docPath: string, permission: Object, wsConfig: Object}>}
  */
 async function checkDocWritePermission(workspaceId, nodeId, operatorId, config, nodeInfo = null) {
+  assertWhitelistFileExists(config);
+
   const wsConfig = findWorkspaceConfig(workspaceId, config);
   
   if (!wsConfig || !wsConfig.whitelist) {
     throw new Error(
       `❌ 权限拒绝：知识库 ${workspaceId} 未配置白名单\n` +
       `💡 安全策略：所有写入操作必须在白名单内\n` +
-      `📝 解决方法：在 config/whitelist.json 中为该知识库配置 whitelist`
+      getWhitelistSetupHint(config)
     );
   }
 
@@ -183,7 +201,7 @@ async function checkDocWritePermission(workspaceId, nodeId, operatorId, config, 
       `❌ 权限拒绝：${permission.reason}\n` +
       `📍 目标路径：${docPath}\n` +
       `🔒 安全策略：只有白名单内的路径允许写入\n` +
-      `📝 解决方法：将路径添加到 config/whitelist.json 的 whitelist 中`
+      `📝 解决方法：将路径添加到 ${config && config._configPath ? config._configPath : 'config/whitelist.json'} 的 whitelist 中`
     );
   }
   
@@ -252,7 +270,8 @@ async function createDocWithPermission(workspaceId, name, docType, parentNodeId 
   if (!config) {
     config = loadConfig();
   }
-  
+  assertWhitelistFileExists(config);
+
   const token = await getAccessToken();
   const operatorId = await getCurrentOperatorId(token, senderId);
   
@@ -261,7 +280,7 @@ async function createDocWithPermission(workspaceId, name, docType, parentNodeId 
   
   // 如果知识库没有配置白名单，不允许写入
   if (!wsConfig || !wsConfig.whitelist) {
-    throw new Error(`权限拒绝：知识库 ${workspaceId} 未配置白名单，不允许写入操作\n💡 提示：请在 config/whitelist.json 中为该知识库配置 whitelist`);
+    throw new Error(`权限拒绝：知识库 ${workspaceId} 未配置白名单，不允许写入操作\n💡 提示：${getWhitelistSetupHint(config)}`);
   }
   
   // 钉钉 getNode 当前不返回完整父目录链路，白名单按节点名匹配。
@@ -307,7 +326,8 @@ async function deleteDocWithPermission(workspaceId, nodeId, config = null, sende
   if (!config) {
     config = loadConfig();
   }
-  
+  assertWhitelistFileExists(config);
+
   const token = await getAccessToken();
   const operatorId = await getCurrentOperatorId(token, senderId);
   
@@ -316,7 +336,7 @@ async function deleteDocWithPermission(workspaceId, nodeId, config = null, sende
   
   // 如果知识库没有配置白名单，不允许写入
   if (!wsConfig || !wsConfig.whitelist) {
-    throw new Error(`权限拒绝：知识库 ${workspaceId} 未配置白名单，不允许删除操作\n💡 提示：请在 config/whitelist.json 中为该知识库配置 whitelist`);
+    throw new Error(`权限拒绝：知识库 ${workspaceId} 未配置白名单，不允许删除操作\n💡 提示：${getWhitelistSetupHint(config)}`);
   }
   
   const nodeInfo = await getNode(nodeId, operatorId);

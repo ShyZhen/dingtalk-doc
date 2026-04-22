@@ -28,13 +28,21 @@ function loadConfig() {
   const configPath = path.join(getSkillDir(), 'config', 'whitelist.json');
   
   if (!fs.existsSync(configPath)) {
-    throw new Error(`配置文件不存在：${configPath}\n请先创建配置文件并设置 workspaces 和 whitelist`);
+    return {
+      workspaces: [],
+      _missingConfig: true,
+      _configPath: configPath
+    };
   }
   
   const configContent = fs.readFileSync(configPath, 'utf8');
   const config = JSON.parse(configContent);
   
-  return config;
+  return {
+    ...config,
+    _missingConfig: false,
+    _configPath: configPath
+  };
 }
 
 /**

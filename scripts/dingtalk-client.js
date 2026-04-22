@@ -36,6 +36,42 @@ const CACHE_TTL = 5 * 60 * 1000; // 5 分钟
 // 调试模式
 const DEBUG = process.argv.includes('--debug') || process.env.DINGTALK_DEBUG === 'true';
 
+function maskValue(value, keep = 4) {
+  if (!value) {
+    return value;
+  }
+  const str = String(value);
+  if (str.length <= keep) {
+    return '*'.repeat(str.length);
+  }
+  return `${'*'.repeat(Math.max(0, str.length - keep))}${str.slice(-keep)}`;
+}
+
+function sanitizeDebugPath(path) {
+  const [pathname, query = ''] = path.split('?');
+  if (!query) {
+    return pathname;
+  }
+
+  const sanitizedQuery = query
+    .split('&')
+    .filter(Boolean)
+    .map(part => {
+      const [key] = part.split('=');
+      return `${key}=***`;
+    })
+    .join('&');
+
+  return `${pathname}?${sanitizedQuery}`;
+}
+
+function summarizeBody(body) {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    return 'body-present';
+  }
+  return `keys=${Object.keys(body).join(',')}`;
+}
+
 /**
  * 获取环境变量
  */
@@ -119,13 +155,13 @@ async function getCurrentOperatorId(token = null, senderId = null) {
   }
 
   if (DEBUG) {
-    console.log(`[调试] 正在通过 sender_id 查询 unionId: ${senderId}`);
+    console.log(`[调试] 正在通过 sender_id 查询 unionId: ${maskValue(senderId)}`);
   }
 
   try {
     const unionId = await getUnionId(senderId, token);
     if (DEBUG) {
-      console.error(`[用户识别] 从当前会话获取：${unionId} (sender: ${senderId})`);
+      console.error(`[用户识别] 已解析当前会话用户 (sender: ${maskValue(senderId)}, operator: ${maskValue(unionId)})`);
     }
     return unionId;
   } catch (e) {
@@ -242,9 +278,9 @@ async function request(method, path, headers = {}, body = null) {
   const accessToken = await getAccessToken();
   
   if (DEBUG) {
-    console.log(`[调试] ${method} ${path}`);
+    console.log(`[调试] ${method} ${sanitizeDebugPath(path)}`);
     if (body) {
-      console.log(`[调试] 请求体：${JSON.stringify(body)}`);
+      console.log(`[调试] 请求体已省略 (${summarizeBody(body)})`);
     }
   }
   
@@ -274,7 +310,7 @@ async function request(method, path, headers = {}, body = null) {
           const result = JSON.parse(data);
           
           if (DEBUG) {
-            console.log(`[调试] 响应：${JSON.stringify(result).slice(0, 200)}...`);
+            console.log(`[调试] 响应状态：HTTP ${res.statusCode}, requestId=${result.requestId || res.headers['x-acs-request-id'] || 'no-request-id'}`);
           }
           
           // 检查错误码
