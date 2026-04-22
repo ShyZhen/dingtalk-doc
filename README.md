@@ -38,8 +38,9 @@ DINGTALK_CLIENTSECRET=your_secret
 
 - `DINGTALK_CLIENTID`：钉钉应用 Client ID
 - `DINGTALK_CLIENTSECRET`：钉钉应用 Client Secret
-- `DINGTALK_DEBUG=true`：可选，输出更详细的请求和响应日志
-- `operatorId` 不需要手工配置，脚本会从 `OPENCLAW_SENDER_ID` / `DINGTALK_SENDER_ID` 解析当前钉钉用户
+- `OPENCLAW_SENDER_ID` / `DINGTALK_SENDER_ID`：通常由 OpenClaw / 钉钉连接器自动注入；如需手工调用 CLI，也可以用 `--senderId=...`
+- `DINGTALK_DEBUG=true`：可选，仅输出请求方法、接口路径、状态码、requestId 等调试信息，不再打印文档正文和请求体
+- `operatorId` 不需要手工配置，脚本会优先从 `--senderId` 或 `OPENCLAW_SENDER_ID` / `DINGTALK_SENDER_ID` 解析当前钉钉用户
 
 ### 1.1 运行路径说明
 
@@ -89,6 +90,12 @@ node scripts/index.js get-doc --nodeId=vy20BglGWOq9ZLj3F0M9ajK0JA7depqY
 ```
 
 ### 3. 配置白名单
+
+说明：
+
+- 读取操作不依赖白名单文件
+- 写入操作才需要 `config/whitelist.json`
+- 如果该文件不存在，写操作会被拒绝，并提示用户手动创建
 
 在 `config/whitelist.json` 中声明允许写入的 workspace 和节点名：
 

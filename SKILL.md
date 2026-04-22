@@ -66,7 +66,8 @@ metadata:
 
 可选环境变量:
 
-- `DINGTALK_DEBUG` - 设置为 `true` 启用调试模式，打印详细请求/响应日志
+- `OPENCLAW_SENDER_ID` / `DINGTALK_SENDER_ID` - 由 OpenClaw / 钉钉连接器注入的当前用户 sender_id；也可以通过命令行 `--senderId=` 显式传入
+- `DINGTALK_DEBUG` - 设置为 `true` 启用调试模式；仅输出方法、路径（查询参数已脱敏）、状态码、requestId 等，不打印文档正文与完整请求体
 
 ### operatorId 获取方式
 
