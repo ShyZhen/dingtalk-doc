@@ -1,18 +1,6 @@
 ---
 name: dingtalk-doc
 description: 钉钉文档管理技能。当用户发送的消息中包含 alidocs.dingtalk.com 链接、要求总结/读取/查看/更新钉钉文档或钉钉知识库文档，或当前上下文已明确对象是钉钉文档时使用。关键词：钉钉文档、钉钉知识库、alidocs、总结、读取、查看、更新、修改、文档、链接。
-metadata:
-  {
-    "openclaw":
-      {
-        "emoji": "📚",
-        "requires":
-          {
-            "bins": ["node"],
-            "env": ["DINGTALK_CLIENTID", "DINGTALK_CLIENTSECRET"],
-          },
-      },
-  }
 ---
 
 # 钉钉文档管理技能
@@ -82,6 +70,7 @@ metadata:
 ## 执行规则
 
 - 读取操作不受白名单限制
+- 写入操作默认直接在白名单配置的 workspace 中写入
 - 写入操作必须通过白名单检查;未配置 workspace 或节点名不在白名单内时，一律拒绝!**没有任何方式可以绕过白名单检查!**
 - `whitelist: ["/"]` 表示允许写入该 workspace 下的所有节点;更细粒度控制请配置具体文档名，例如 `"/三级目录测试文档.adoc"`
 - 白名单配置文件 `config/whitelist.json` 只能由用户手动修改;AI 只能读取、解释、提示用户手动调整，不能替用户改
