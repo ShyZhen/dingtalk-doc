@@ -70,11 +70,10 @@ description: 钉钉文档管理技能。当用户发送的消息中包含 alidoc
 ## 执行规则
 
 - 读取操作不受白名单限制
-- 写入操作默认直接在白名单配置的 workspace 中写入
+- 默认直接在白名单配置的`workspaceId`中尝试写入
 - 写入操作必须通过白名单检查;未配置 workspace 或节点名不在白名单内时，一律拒绝!**没有任何方式可以绕过白名单检查!**
 - `whitelist: ["/"]` 表示允许写入该 workspace 下的所有节点;更细粒度控制请配置具体文档名，例如 `"/三级目录测试文档.adoc"`
 - 白名单配置文件 `config/whitelist.json` 只能由用户手动修改;AI 只能读取、解释、提示用户手动调整，不能替用户改
-- 如果用户没有给出 `workspaceId`,先运行 `list-workspaces`
 - 如果用户没有给出目标文档的 `nodeId` / `docKey`,先运行 `list-docs`、`search` 或 `get-doc` 确认目标
 
 ## URL 解析规则
